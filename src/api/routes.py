@@ -2,7 +2,8 @@
 This module takes care of starting the API Server, Loading the DB and Adding the endpoints
 """
 from flask import Flask, request, jsonify, url_for, Blueprint
-from api.models import db, User
+from api.models import db, Employee, Locales, Checks, Roles, Vacations, Incidents, Reports, Schedule, Month_Schedule, Shifts, Inventory, Categories, Sub_Categories, Deliveries, Meals, Ingredients, Daily_Menus, Clients, Orders, Tables, Reservations 
+
 from api.utils import generate_sitemap, APIException
 
 api = Blueprint('api', __name__)
