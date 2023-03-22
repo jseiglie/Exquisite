@@ -1,3 +1,92 @@
 /* 
     General Styles used on every website (Don't Repeat Yourself)
 */
+@import url("https://fonts.googleapis.com/css2?family=Cormorant:wght@500&display=swap");
+body {
+  background-color: rgba(0, 0, 0, 0.89);
+}
+
+.login-wrapper {
+  display: flex;
+  flex-direction: column;
+  align-content: center;
+  flex-wrap: wrap;
+  height: 80vh;
+  justify-content: center;
+  align-items: center;
+}
+
+.login-banner {
+  background-color: rgba(33, 33, 33, 0.616);
+  color: rgba(251, 149, 4, 1);
+  font-size: 30pt;
+  font-family: "Cormorant", serif;
+}
+
+.login-banner_text_logo {
+  height: 60pt;
+}
+.login-logo {
+  width: 10rem;
+  height: auto;
+}
+
+.nav-link,
+.nav-link.active {
+  color: rgba(251, 149, 4, 1) !important;
+  background-color: transparent !important;
+  border: 1px solid rgba(251, 149, 4, 1);
+}
+
+.nav-link:hover {
+  filter: drop-shadow(0px 2px 4px rgb(224, 223, 223));
+}
+
+.login-input,
+.btn-dashboard {
+  border: 1px solid rgba(251, 149, 4, 1);
+  background-color: transparent;
+  color: rgba(251, 149, 4, 1);
+  border-radius: 0.25rem;
+  display: flex;
+  padding: 0.5rem 1.5rem;
+}
+input::placeholder {
+  /* Chrome, Firefox, Opera, Safari 10.1+ */
+  color: rgba(251, 149, 4, 1) !important;
+  opacity: 1; /* Firefox */
+}
+
+input:-ms-input-placeholder {
+  /* Internet Explorer 10-11 */
+  color: rgba(251, 149, 4, 1) !important;
+}
+
+input::-ms-input-placeholder {
+  /* Microsoft Edge */
+  color: rgba(251, 149, 4, 1) !important;
+}
+
+.close_icon {
+  cursor: pointer;
+  transition: all 0.075s ease-in-out;
+  width: 1.5rem;
+  height: 1.5rem;
+  border: 0.1em solid;
+  border-color: rgba(250, 250, 250, 0.8);
+  border-radius: 6em;
+  /*background: rgba(255,255,255,0.8);*/
+}
+.close_icon:after {
+  transition: all 0.075s ease-in-out;
+  font: 1em Helvetica, arial;
+  font-size: 1em;
+  width: 100%;
+  height: 100%;
+  content: "x";
+  color: rgba(250, 250, 250, 0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  transform: translate(0, -5%) scale(1.25, 1);
+}
