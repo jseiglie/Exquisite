@@ -4,8 +4,6 @@ from datetime import datetime
 db = SQLAlchemy()
 
 # HR
-
-
 class Employee(db.Model):
     __tablename__ = "employee"
     id = db.Column(db.Integer, primary_key=True)
@@ -23,14 +21,19 @@ class Employee(db.Model):
     payments = db.Column(db.Integer, nullable=False)
     vacations_amount = db.Column(db.Integer, nullable=False)
     hired = db.Column(db.Date, nullable=False)
-    fired = db.Column(db.Date, nullable=False)
-    local = db.relationship("Locales", backref="Employee", lazy=True)
-    role = db.relationship("Roles", backref="Employee", lazy=True)
-    schedule = db.relationship("Schedule", backref="Employee", lazy=True)
-    reports = db.relationship("Reports", backref="Employee", lazy=True)
-    incidents = db.relationship("Incidents", backref="Employee", lazy=True)
-    vacations = db.relationship("Vacations", backref="Employee", lazy=True)
-    check_in_out = db.relationship("Checks", backref="Employee", lazy=True)
+    fired = db.Column(db.Date)
+    local_id = db.Column(db.Integer, db.ForeignKey("locales.id"))
+    local = db.relationship("Locales", backref="employee", lazy=True)
+    role_id = db.Column(db.Integer, db.ForeignKey("roles.id"))
+    role = db.relationship("Roles", backref="employee", lazy=True)
+    schedule = db.relationship("Schedule", backref="employee", lazy=True)
+    reports_id = db.Column(db.Integer, db.ForeignKey("reports.id"))
+    reports = db.relationship("Reports", backref="employee", lazy=True)
+    incidents_id = db.Column(db.Integer, db.ForeignKey("incidents.id"))
+    incidents = db.relationship("Incidents", backref="employee", lazy=True)
+    vacations_id = db.Column(db.Integer, db.ForeignKey("vacations.id"))
+    vacations = db.relationship("Vacations", backref="employee", lazy=True)
+    check_in_out = db.relationship("Checks", backref="employee", lazy=True)
 
     def __repr__(self):
         return f"{self.full_name}"
@@ -53,10 +56,15 @@ class Employee(db.Model):
             "hired": self.hired,
             "fired": self.fired,
             "local": self.local,
+            "local_id": self.local_id,
+            "role_id": self.role_id,
             "role": self.role,
             "schedule": self.schedule,
+            "reports_id": self.reports_id,
             "reports": self.reports,
-            "incidents": self.incidents,
+            "incidents_id": self.incidents_id,
+            "incidents": self.incidents, #[incident.json() for incident in self.incidents],
+            "vacations_id": self.vacations_id,
             "vacations": self.vacations,
             "check_in_out": self.check_in_out
         }
@@ -65,13 +73,12 @@ class Employee(db.Model):
 class Locales(db.Model):
     __tablename__ = "locales"
     id = db.Column(db.Integer, primary_key=True)
-    local = db.Column(db.String(30))
-    address = db.Column(db.String(100))
-    employee_id = db.Column(db.Integer, db.ForeignKey(
-        "employee.id"), nullable=False)
-
+    local = db.Column(db.String(30), nullable=False)
+    address = db.Column(db.String(100), nullable=False)
+    employee_id = db.relationship("Employee", back_populates="local")
+    
     def __repr__(self):
-        return f"{locale}"
+        return f"{self.local}"
 
     def serialize(self):
         return {
@@ -108,8 +115,7 @@ class Roles(db.Model):
     __tablename__ = "roles"
     id = db.Column(db.Integer, primary_key=True)
     role = db.Column(db.String(10))
-    employee_id = db.Column(db.Integer, db.ForeignKey(
-        "employee.id"), nullable=False)
+    employee_id = db.relationship("Employee", back_populates="role")
 
     def __repr__(self):
         return f"{self.role}"
@@ -127,8 +133,7 @@ class Vacations(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     start = db.Column(db.DateTime, nullable=False)
     end = db.Column(db.DateTime, nullable=False)
-    employee_id = db.Column(db.Integer, db.ForeignKey(
-        "employee.id"), nullable=False)
+    employee_id = db.relationship("Employee", back_populates="vacations")
 
     def __repr__(self):
         return f"Vacations {self.id}"
@@ -148,8 +153,7 @@ class Incidents(db.Model):
     level = db.Column(db.String(5), nullable=False)
     incident = db.Column(db.String(500), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    employee_id = db.Column(db.Integer, db.ForeignKey(
-        "employee.id"), nullable=False)
+    employee_id = db.relationship("Employee", back_populates="incidents")
 
     def __repr__(self):
         return f"Incident {self.id}"
@@ -170,8 +174,7 @@ class Reports(db.Model):
     level = db.Column(db.String(5), nullable=False)
     report = db.Column(db.String(500), nullable=False)
     date = db.Column(db.DateTime, nullable=False, default=datetime.utcnow())
-    employee_id = db.Column(db.Integer, db.ForeignKey(
-        "employee.id"), nullable=False)
+    employee_id = db.relationship("Employee", back_populates="reports")
 
     def __repr__(self):
         return f"Report {self.id}"
@@ -225,8 +228,8 @@ class Shifts(db.Model):
     __tablename__ = "shifts"
     id = db.Column(db.Integer, primary_key=True)
     shift = db.Column(db.String(20), nullable=False)
-    start = db.Column(db.DateTime, nullable=False)
-    end = db.Column(db.DateTime, nullable=False)
+    start = db.Column(db.String(20), nullable=False)
+    end = db.Column(db.String(20), nullable=False)
 
     def __repr__(self):
         return f"{self.shift}"
@@ -293,7 +296,7 @@ class Categories(db.Model):
     category = db.Column(db.String(20), nullable=False)
 
     def __repr__(self):
-        return f"{self.category}"
+        return {f"{self.category}"}
 
     def serialize(self):
         return {
@@ -305,10 +308,10 @@ class Categories(db.Model):
 class Sub_Categories(db.Model):
     __tablename__ = "sub_categories"
     id = db.Column(db.Integer, primary_key=True)
-    sub_category = db.Column(db.String(20))
+    sub_category = db.Column(db.String(20), nullable=False)
 
     def __repr__(self):
-        return f"{self.sub_category}"
+        return {f"{self.sub_category}"}
 
     def serialize(self):
         return {
