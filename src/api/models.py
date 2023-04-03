@@ -55,17 +55,17 @@ class Employee(db.Model):
             "vacations_amount": self.vacations_amount,
             "hired": self.hired,
             "fired": self.fired,
-            "local": self.local,
+            "local": self.local.id,
             "local_id": self.local_id,
             "role_id": self.role_id,
-            "role": self.role,
+            "role": self.role.id,
             "schedule": self.schedule,
             "reports_id": self.reports_id,
-            "reports": self.reports,
+            "reports": self.reports.serialize() if self.reports else None,
             "incidents_id": self.incidents_id,
-            "incidents": self.incidents, #[incident.json() for incident in self.incidents],
+            "incidents": self.incidents.id, #[incident.json() for incident in self.incidents],
             "vacations_id": self.vacations_id,
-            "vacations": self.vacations,
+            "vacations": self.vacations.selialize() if self.vacations else None,
             "check_in_out": self.check_in_out
         }
 
@@ -164,7 +164,7 @@ class Incidents(db.Model):
             "level": self.level,
             "incident": self.incident,
             "date": self.date,
-            "employee_id": self.employee_id
+            "employee_id": self.employee_id.id
         }
 
 
@@ -183,9 +183,9 @@ class Reports(db.Model):
         return {
             "id": self.id,
             "level": self.level,
-            "report": self.incident,
+            "report": self.report,
             "date": self.date,
-            "employee_id": self.employee_id
+             
         }
 
 
@@ -244,24 +244,30 @@ class Shifts(db.Model):
 
 
 # Inventory
-categories_rel = db.Table("categories_rel",
-                          db.Column("inventory_id", db.Integer, db.ForeignKey(
-                              "inventory.id"), primary_key=True),
-                          db.Column("categories_id", db.Integer, db.ForeignKey(
-                              "categories.id"), primary_key=True)
-                          )
-sub_categories_rel = db.Table("sub_categories_rel",
-                              db.Column("inventory_id", db.Integer, db.ForeignKey(
-                                  "inventory.id"), primary_key=True),
-                              db.Column("sub_categories_id", db.Integer, db.ForeignKey(
-                                  "sub_categories.id"), primary_key=True)
-                              )
-inventory_delivery_rel = db.Table("inventory_delivery_rel",
-                                  db.Column("inventory_id", db.Integer, db.ForeignKey(
-                                      "inventory.id"), primary_key=True),
-                                  db.Column("deliveries_id", db.Integer, db.ForeignKey(
-                                      "deliveries.id"), primary_key=True)
-                                  )
+
+class Categories_rel(db.Model):
+    __tablename__="category_rel"
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    inventory_id = db.Column(db.Integer, db.ForeignKey(
+                              "inventory.id"), primary_key=True)
+    category_id = db.Column(db.Integer, db.ForeignKey(
+                              "categories.id"), primary_key=True)                        
+
+class Sub_categories_rel(db.Model):
+    __tablename__="sub_category_rel"
+    id = db.Column(db.Integer, primary_key=True)
+    inventory_id = db.Column(db.Integer, db.ForeignKey(
+                              "inventory.id"), primary_key=True)
+    sub_category_id = db.Column(db.Integer, db.ForeignKey(
+                              "sub_categories.id"), primary_key=True)                        
+
+class Inventory_delivery_rel(db.Model):
+    __tablename__="inventory_delivery_rel"
+    id = db.Column(db.Integer, primary_key=True)
+    inventory_id = db.Column(db.Integer, db.ForeignKey(
+                              "inventory.id"), primary_key=True)
+    deliveries_id = db.Column(db.Integer, db.ForeignKey(
+                              "deliveries.id"), primary_key=True)                        
 
 
 class Inventory(db.Model):
@@ -269,12 +275,12 @@ class Inventory(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     item = db.Column(db.String(50), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
-    category = db.relationship("Categories", secondary=categories_rel,
-                               lazy="subquery", backref=db.backref("category_rel", lazy=True))
-    sub_category = db.relationship("Sub_Categories", secondary=sub_categories_rel,
-                                   lazy="subquery", backref=db.backref("sub_category_rel", lazy=True))
-    last_deliver = db.relationship("Deliveries", secondary=inventory_delivery_rel,
-                                   lazy="subquery", backref=db.backref("inventory_delivery_rel", lazy=True))
+    category = db.relationship("Categories_rel", 
+                               backref="categories_rel", lazy=True)
+    sub_category = db.relationship("Sub_categories_rel",
+                                   backref="sub_category_rel", lazy=True)
+    last_deliver = db.relationship("Inventory_delivery_rel", 
+                                    backref="inventory_delivery_rel", lazy=True)
 
     def __repr__(self):
         return {f"{self.item}"}
